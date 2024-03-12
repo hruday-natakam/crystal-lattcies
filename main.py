@@ -35,12 +35,10 @@ def update_plot(event, sigma):
             right_ax.set_title('Its co-ordinates')
             right_ax.set_xlim(-1, 1)
             right_ax.set_ylim(-1, 1)
-
             plt.draw()
 
 # Plot 1
 fig, (left_ax, right_ax) = plt.subplots(1, 2, figsize=(10, 5))
-
 polygon = Polygon(np.vstack((x, y)).T, color='yellow')
 left_ax.add_patch(polygon)
 left_ax.set_aspect('equal')
