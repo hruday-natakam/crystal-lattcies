@@ -23,12 +23,14 @@ def update_plot(event, sigma):
             v2 = np.sqrt(r12**2 + r02**2)
             ang = np.arccos((-4 * hover_y**2) / np.sqrt((9 * hover_x**2 + 5 * hover_y**2 - 6 * hover_y + 9)**2 - 36 * hover_x**2 * (3 - hover_y)**2))
 
-            # Clear the previous plot
-            right_ax.clear()
+            # Clear the previous patches only
+            for patch in right_ax.patches:
+                patch.remove()
+
             right_ax.plot(a, b, 'ko', markersize=5)  # Original point
-            right_ax.add_patch(FancyArrowPatch((a[0], b[0]), (a[0] + v1, b[0]), color='green', arrowstyle='->', mutation_scale=20))
-            right_ax.add_patch(FancyArrowPatch((a[0], b[0]), (a[0] + v2 * np.cos(ang), b[0] + v2 * np.sin(ang)), color='blue', arrowstyle='->', mutation_scale=20))
-            right_ax.add_patch(FancyArrowPatch((a[0], b[0]), (a[0] - v1 - v2 * np.cos(ang), b[0] - v2 * np.sin(ang)), color='red', arrowstyle='->', mutation_scale=20))
+            right_ax.add_patch(FancyArrowPatch((a[0], b[0]), (a[0] + v1, b[0]), color='green', arrowstyle='->', mutation_scale=10))
+            right_ax.add_patch(FancyArrowPatch((a[0], b[0]), (a[0] + v2 * np.cos(ang), b[0] + v2 * np.sin(ang)), color='blue', arrowstyle='->', mutation_scale=10))
+            right_ax.add_patch(FancyArrowPatch((a[0], b[0]), (a[0] - v1 - v2 * np.cos(ang), b[0] - v2 * np.sin(ang)), color='red', arrowstyle='->', mutation_scale=10))
             right_ax.set_aspect('equal')
             right_ax.set_xlabel('x')
             right_ax.set_ylabel('y')
@@ -37,6 +39,7 @@ def update_plot(event, sigma):
             right_ax.set_ylim(-1, 1)
 
             plt.draw()
+
 
 # Plot 1
 fig, (left_ax, right_ax) = plt.subplots(1, 2, figsize=(10, 5))
