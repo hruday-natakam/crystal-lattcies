@@ -93,7 +93,7 @@ html {
   }
   
   .animation button {
-    background-color: #007bff; 
+    background-color: #014691; 
     color: white;
     border: none;
     border-radius: 3px;
@@ -107,21 +107,21 @@ html {
   }
 
   .structure button {
-    background-color: #f39d1c; 
+    background-color: #cb0404; 
     color: white;
     border: none;
     border-radius: 3px;
     padding: 10px 20px;
     cursor: pointer; 
-    box-shadow: 0 2px 4px rgba(233, 157, 59, 0.5); 
+    box-shadow: 0 2px 4px rgba(233, 59, 59, 0.5); 
   }
   
   .structure button:hover {
-    background-color: #ecbe4b; 
+    background-color: #ec534b; 
   }
 
   .rotate button {
-    background-color: #59f31c; 
+    background-color: #287d06; 
     color: white;
     border: none;
     border-radius: 3px;
