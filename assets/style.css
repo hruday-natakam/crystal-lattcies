@@ -106,6 +106,34 @@ html {
     background-color: #0056b3; 
   }
 
+  .structure button {
+    background-color: #f39d1c; 
+    color: white;
+    border: none;
+    border-radius: 3px;
+    padding: 10px 20px;
+    cursor: pointer; 
+    box-shadow: 0 2px 4px rgba(233, 157, 59, 0.5); 
+  }
+  
+  .structure button:hover {
+    background-color: #ecbe4b; 
+  }
+
+  .rotate button {
+    background-color: #59f31c; 
+    color: white;
+    border: none;
+    border-radius: 3px;
+    padding: 10px 20px;
+    cursor: pointer; 
+    box-shadow: 0 2px 4px rgba(126, 233, 59, 0.5); 
+  }
+  
+  .rotate button:hover {
+    background-color: #9eec4b; 
+  }
+
 /* Footer styling */
 .footer {
     background-color: #333;

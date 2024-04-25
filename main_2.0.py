@@ -1,4 +1,4 @@
-#Dash Core Components (graphs and sliders), INPUT OUTPUT for callbacks, plotly for visualisation
+
 import dash
 from dash import dcc, html, Input, Output, State
 import plotly.graph_objs as go
@@ -11,7 +11,7 @@ y = np.array([0, 0.5, 1, 0, 0])
 # Create Dash App
 app = dash.Dash(__name__, external_stylesheets=['/style.css'])
 
-#html layout
+# HTML layout
 app.layout = html.Div(className='container', children=[
     html.Div(className='header', children=[
         html.H1('Lattice Visualization Tool'),
@@ -41,14 +41,25 @@ app.layout = html.Div(className='container', children=[
             html.Label('Range of Lattice Points:', htmlFor='range-input'),
             dcc.Input(id='range-input', type='number', value=4, min=1, max=20, step=1),
         ]),
-            html.Div(className='animation', children=[
+        html.Div(className='animation', children=[
             html.Button('Animation ON/OFF', id='animation-button', n_clicks=0),
-        ])
+        ]),
+        html.Div(className='structure', children=[
+            html.Button('Structure ON/OFF', id='structure-button', n_clicks=0),
+        ]),
+        html.Div(className='rotate', children=[
+            html.Button('Rotate', id='rotate-button', n_clicks=0),
+        ]),
     ]),
     html.Footer(className='footer', children=[
         html.P(['©2024 Made by Team 5. All rights reserved.']),
     ]),
 ])
+
+# Function to rotate points by 90 degrees
+def rotate_90(x, y):
+    """ Rotate a point counterclockwise by 90 degrees around the origin. """
+    return -y, x
 
 def calculate_vectors(hover_x, hover_y, sigma):
     """Calculate vectors and angles based on input coordinates and sigma."""
@@ -68,38 +79,39 @@ def calculate_vectors(hover_x, hover_y, sigma):
 
     return dir1, dir2
 
-#Callback function to update the 'coordinates-plot' when hover data on 'lattices-plot' or when sigma-input changes
+
+
+# Callback function to update the 'coordinates-plot' when hover data on 'lattices-plot' or when sigma-input changes
 @app.callback(
     Output('coordinates-plot', 'figure'),
     [Input('lattices-plot', 'hoverData'),
      Input('sigma-input', 'value'),
      Input('range-input', 'value'),
-     Input('animation-button', 'n_clicks')],  # Add the animation button as an input
-    [State('coordinates-plot', 'figure')]  # Use the current state of the figure
+     Input('animation-button', 'n_clicks'),
+     Input('structure-button', 'n_clicks'),
+     Input('rotate-button', 'n_clicks'),],
+    [State('coordinates-plot', 'figure')]
 )
+def update_plot(hoverData, sigma, range_val, animation_n_clicks, structure_n_clicks,rotate_clicks,current_figure):
+    fig = go.Figure()
+    origin = np.array([0, 0])
 
-#generate Plotly graphs base on hover data from another graph
-def update_plot(hoverData, sigma, range_val, n_clicks, current_figure):
-    fig = go.Figure() #initialise empty plotly figure
-    origin = np.array([0, 0]) # Use a 2D origin point
+    hover_x = hover_y = 0
+    animate = animation_n_clicks % 2 != 0
+    show_structure = structure_n_clicks % 2 == 0
 
-    hover_x = hover_y = 0  
-    # r12 = r01 = r02 = 0  # Default values if hoverData is not available
-    animate = n_clicks % 2 != 0 # Check the number of clicks to determine whether to animate or not
-    
+
     if animate:
-        # If the button has been clicked an odd number of times, run the animation
         path_points = [
-            (0, 0), (0.000001, 0.999999),    # From (0, 0) to (0, 1)
-            (0.000002, 1), (0.999999, 0), # From (0, 1) to (1, 0)
-            (1, 0.000001), (0.000002, 0.000002),     # From (1, 0) to (0, 0)
-            (0.000003, 0.000003), (0.25, 0.25) # From (0, 0) to (0.25, 0.25)
+            (0, 0), (0.000001, 0.999999),
+            (0.000002, 1), (0.999999, 0),
+            (1, 0.000001), (0.000002, 0.000002),
+            (0.000003, 0.000003), (0.25, 0.25)
         ]
 
-        total_steps = 160 # Adjust the number of steps in the animation as desired
+        total_steps = 160
         steps_per_segment = total_steps // (len(path_points) // 2)
 
-        # Create frames for the animation
         frames = []
         for i in range(0, len(path_points), 2):
             start_point = path_points[i]
@@ -108,36 +120,36 @@ def update_plot(hoverData, sigma, range_val, n_clicks, current_figure):
                 hover_x = (1 - step) * start_point[0] + step * end_point[0]
                 hover_y = (1 - step) * start_point[1] + step * end_point[1]
                 dir1, dir2 = calculate_vectors(hover_x, hover_y, sigma)
-        
+
                 i = np.arange(-range_val, range_val + 1)
                 j = np.arange(-range_val, range_val + 1)
                 ix, jx = np.meshgrid(i, j, indexing='ij')
                 points = origin + ix.reshape(-1, 1) * dir1 + jx.reshape(-1, 1) * dir2
                 square_corners = np.array([origin, origin + dir1, origin + dir1 + dir2, origin + dir2, origin])
-                
-                frame = go.Frame(
-                    data=[
-                        go.Scatter(x=points[:, 0], y=points[:, 1], mode='markers', marker=dict(size=5, color='black')),
-                        go.Scatter(x=square_corners[:, 0], y=square_corners[:, 1], mode='lines', fill='toself', line=dict(color='cyan')),
-                        go.Scatter(x=[origin[0], origin[0] + dir1[0]], y=[origin[1], origin[1] + dir1[1]], mode='lines+markers', line=dict(color='green', width=2)),
-                        go.Scatter(x=[origin[0], origin[0] + dir2[0]], y=[origin[1], origin[1] + dir2[1]], mode='lines+markers', line=dict(color='blue', width=2)),
-                        go.Scatter(x=[origin[0], origin[0] - dir1[0] - dir2[0]], y=[origin[1], origin[1] - dir1[1] - dir2[1]], mode='lines+markers', line=dict(color='red', width=2))
-                    ],
-                    name=str(hover_y)
-                )
+
+                frame_data = [go.Scatter(x=points[:, 0], y=points[:, 1], mode='markers', marker=dict(size=5, color='black'))]
+
+                if show_structure:
+                    frame_data.append(go.Scatter(x=square_corners[:, 0], y=square_corners[:, 1], mode='lines', fill='toself', line=dict(color='cyan')))
+
+                frame_data.extend([
+                    go.Scatter(x=[origin[0], origin[0] + dir1[0]], y=[origin[1], origin[1] + dir1[1]], mode='lines+markers', line=dict(color='green', width=2)),
+                    go.Scatter(x=[origin[0], origin[0] + dir2[0]], y=[origin[1], origin[1] + dir2[1]], mode='lines+markers', line=dict(color='blue', width=2)),
+                    go.Scatter(x=[origin[0], origin[0] - dir1[0] - dir2[0]], y=[origin[1], origin[1] - dir1[1] - dir2[1]], mode='lines+markers', line=dict(color='red', width=2))
+                ])
+
+                frame = go.Frame(data=frame_data, name=str(hover_y))
                 frames.append(frame)
 
-        # Add the initial state of the figure
-        fig.add_trace(go.Scatter(x=[0], y=[0], mode='markers', marker=dict(size=5, color='black')))
-        # Draw the initial square
-        square_corners = np.array([origin, origin + dir1, origin + dir1 + dir2, origin + dir2, origin])
-        fig.add_trace(go.Scatter(x=square_corners[:, 0], y=square_corners[:, 1], mode='lines', fill='toself', line=dict(color='cyan')))
-        # Plot the initial vectors from the origin
+        fig.add_trace(go.Scatter(x=points[:, 0], y=points[:, 1], mode='markers', marker=dict(size=5, color='black')))
+
+        if show_structure:
+            fig.add_trace(go.Scatter(x=square_corners[:, 0], y=square_corners[:, 1], mode='lines', fill='toself', line=dict(color='cyan')))
+
         fig.add_trace(go.Scatter(x=[origin[0], origin[0] + dir1[0]], y=[origin[1], origin[1] + dir1[1]], mode='lines+markers', line=dict(color='green', width=2)))
         fig.add_trace(go.Scatter(x=[origin[0], origin[0] + dir2[0]], y=[origin[1], origin[1] + dir2[1]], mode='lines+markers', line=dict(color='blue', width=2)))
         fig.add_trace(go.Scatter(x=[origin[0], origin[0] - dir1[0] - dir2[0]], y=[origin[1], origin[1] - dir1[1] - dir2[1]], mode='lines+markers', line=dict(color='red', width=2)))
 
-        # Set up layout for the animation
         fig.update_layout(
             title='2D Lattice from Hovered Point',
             xaxis=dict(range=[-1, 1], autorange=False),
@@ -164,7 +176,6 @@ def update_plot(hoverData, sigma, range_val, n_clicks, current_figure):
             }]
         )
 
-        # Set up the initial frame
         fig['frames'] = frames
         fig['layout']['sliders'] = [{
             'steps': [{'args': [[f.name], {'frame': {'duration': 300, 'redraw': True}, 'mode': 'immediate', 'transition': {'duration': 0}}],
@@ -179,24 +190,25 @@ def update_plot(hoverData, sigma, range_val, n_clicks, current_figure):
         }]
 
     else:
-        # If the button has been clicked an even number of times, handle hover data
         if hoverData:
             hover_x = hoverData['points'][0]['x']
             hover_y = hoverData['points'][0]['y']
             dir1, dir2 = calculate_vectors(hover_x, hover_y, sigma)
+
+            for _ in range(rotate_clicks % 4):
+                        dir1 = np.array(rotate_90(dir1[0], dir1[1]))
+                        dir2 = np.array(rotate_90(dir2[0], dir2[1]))
             
-            # Generate lattice points using efficient numpy operations
             i = np.arange(-range_val, range_val + 1)
             j = np.arange(-range_val, range_val + 1)
             ix, jx = np.meshgrid(i, j, indexing='ij')
             points = origin + ix.reshape(-1, 1) * dir1 + jx.reshape(-1, 1) * dir2
             fig.add_trace(go.Scatter(x=points[:, 0], y=points[:, 1], mode='markers', marker=dict(size=5, color='black')))
             
-            # Draw the square
-            square_corners = np.array([origin, origin + dir1, origin + dir1 + dir2, origin + dir2, origin])
-
-            # Plot the vectors from the origin
-            fig.add_trace(go.Scatter(x=square_corners[:, 0], y=square_corners[:, 1], mode='lines', fill='toself', line=dict(color='cyan')))
+            if show_structure:
+                square_corners = np.array([origin, origin + dir1, origin + dir1 + dir2, origin + dir2, origin])
+                fig.add_trace(go.Scatter(x=square_corners[:, 0], y=square_corners[:, 1], mode='lines', fill='toself', line=dict(color='cyan')))
+            
             fig.add_trace(go.Scatter(x=[origin[0], origin[0] + dir1[0]], y=[origin[1], origin[1] + dir1[1]], mode='lines+markers', line=dict(color='green', width=2)))
             fig.add_trace(go.Scatter(x=[origin[0], origin[0] + dir2[0]], y=[origin[1], origin[1] + dir2[1]], mode='lines+markers', line=dict(color='blue', width=2)))
             fig.add_trace(go.Scatter(x=[origin[0], origin[0] - dir1[0] - dir2[0]], y=[origin[1], origin[1] - dir1[1] - dir2[1]], mode='lines+markers', line=dict(color='red', width=2)))
@@ -208,35 +220,26 @@ def update_plot(hoverData, sigma, range_val, n_clicks, current_figure):
             showlegend=False
         )    
 
-    # print(hoverData)
     print(f"Hovered coordinates: ({hover_x}, {hover_y})")
     
     return fig
 
-# another callback function to update the 'lattices-plot' when sigma-input changes
+# Another callback function to update the 'lattices-plot' when sigma-input changes
 @app.callback(
     Output('lattices-plot', 'figure'),
     [Input('sigma-input', 'value')]
 )
-
-    
-# generate plotly graph bases on hover data
 def update_lattices_plot(sigma):
     fig = go.Figure()
 
-    # Original scatter plot with markers
     fig.add_trace(go.Scatter(x=x, y=y, mode='markers+lines', fill='toself', fillcolor='yellow', marker=dict(size=10, color='blue')))
     
-    # Create a grid of points
-    grid_x, grid_y = np.meshgrid(np.linspace(0, 1, 100), np.linspace(0, 1, 100))  # Adjust the range and density as needed
+    grid_x, grid_y = np.meshgrid(np.linspace(0, 1, 100), np.linspace(0, 1, 100))
     grid_x = grid_x.flatten()
     grid_y = grid_y.flatten()
 
-    # Add the grid as an invisible scatter plot (matching the background color)
-    # Setting opacity to 0 makes the points invisible but still able to capture hover events
     fig.add_trace(go.Scatter(x=grid_x, y=grid_y, mode='markers', marker=dict(size=1, color='rgba(255, 255, 255, 0)'), hoverinfo='none'))
 
-    # Adjust x and y axis range
     fig.update_xaxes(range=[min(x), max(x)])
     fig.update_yaxes(range=[min(y), max(y)])
     
