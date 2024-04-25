@@ -10,7 +10,7 @@ x = np.array([1, 0.5, 0, 0, 1])
 y = np.array([0, 0.5, 1, 0, 0])
 
 # Import external stylesheets
-app = dash.Dash(__name__, external_stylesheets=['/assets/style.css'])
+app = dash.Dash(__name__, external_stylesheets=['/style.css'])
 
 app.layout = html.Div(className='container', children=[
     html.Div(className='header', children=[
@@ -35,12 +35,13 @@ app.layout = html.Div(className='container', children=[
     html.Div(className='input-container', children=[
         html.Div(className='input-group', children=[
             html.Label('Sigma:', htmlFor='sigma-input'),
-            dcc.Input(id='sigma-input', type='number', value=1, step=0.1),
+            dcc.Input(id='sigma-input', type='number', value=1, step=0.1, style={'marginTop': '20px'}),
         ]),
         html.Div(className='input-group', children=[
             html.Label('Range of Lattice Points:', htmlFor='range-input'),
-            dcc.Input(id='range-input', type='number', value=4, min=1, max=20, step=1),
+            dcc.Input(id='range-input', type='number', value=4, min=1, max=20, step=1, style={'margin': '10px'}),
         ]),
+        html.Button('Animation', id='animation-button', n_clicks=0)
     ]),
     html.Footer(className='footer', children=[
         html.P(['©2024 Made by Team 5. All rights reserved.']),
