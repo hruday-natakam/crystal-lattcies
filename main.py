@@ -2,7 +2,7 @@ import dash
 from dash import dcc, html, Input, Output, State
 import plotly.graph_objs as go
 import numpy as np
-import time  
+# import time  
 
 # Data for plots - coordinates for x y
 x = np.array([1, 0.5, 0, 0, 1])
@@ -103,7 +103,7 @@ def calculate_vectors(hover_x, hover_y, sigma):
     [State('coordinates-plot', 'figure')]
 )
 def update_plot(hoverData, sigma, range_val, animation_n_clicks, structure_n_clicks, rotate_clicks, dir1_scale, dir2_scale, current_figure):
-    start_time = time.time()  # Start timing
+    # start_time = time.time()  # Start timing
 
     fig = go.Figure()
     origin = np.array([0, 0])
@@ -114,14 +114,14 @@ def update_plot(hoverData, sigma, range_val, animation_n_clicks, structure_n_cli
 
     if animate:
         path_points = [
-            (0, 0), (0.000001, 0.999999),
-            (0.000002, 1), (0.999999, 0),
-            (1, 0.000001), (0.000002, 0.000002),
-            (0.000003, 0.000003), (0.25, 0.25)
+            (0, 0), (0, 1),
+            (0, 1), (1, 0),
+            (1, 0), (0, 0),
+            (0, 0), (0.25, 0.25)
         ]
 
-        total_steps = 160
-        steps_per_segment = total_steps // (len(path_points) // 2)
+        total_steps = 260
+        steps_per_segment = total_steps // (len(path_points))
 
         frames = []
         for i in range(0, len(path_points), 2):
@@ -243,8 +243,8 @@ def update_plot(hoverData, sigma, range_val, animation_n_clicks, structure_n_cli
             showlegend=False
         )    
 
-    end_time = time.time()  # End timing
-    print(f"Callback execution time: {end_time - start_time:.4f} seconds")  # Print execution time
+    # end_time = time.time()  # End timing
+    # print(f"Callback execution time: {end_time - start_time:.4f} seconds")  # Print execution time
     return fig
 
 # Another callback function to update the 'lattices-plot' when sigma-input changes
@@ -253,7 +253,7 @@ def update_plot(hoverData, sigma, range_val, animation_n_clicks, structure_n_cli
     [Input('sigma-input', 'value')]
 )
 def update_lattices_plot(sigma):
-    start_time = time.time()  # Start timing
+    # start_time = time.time()  # Start timing
 
     fig = go.Figure()
 
@@ -276,8 +276,8 @@ def update_lattices_plot(sigma):
         showlegend=False
     )
 
-    end_time = time.time()  # End timing
-    print(f"Lattices plot update time: {end_time - start_time:.4f} seconds")  # Print execution time
+    # end_time = time.time()  # End timing
+    # print(f"Lattices plot update time: {end_time - start_time:.4f} seconds")  # Print execution time
     return fig
 
 # Main execution
